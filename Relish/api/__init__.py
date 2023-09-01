@@ -48,4 +48,9 @@ def init_app():
             "ping": time.time() - startTime,
         }
 
+    with app.app_context():
+        from .customer import customer
+
+        app.register_blueprint(customer.customerBlueprint, url_prefix="/users")
+
     return app
