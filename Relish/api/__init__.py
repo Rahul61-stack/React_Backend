@@ -3,7 +3,7 @@ Flask imports
 """
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from flask_pymongo import PyMongo
+from flask.json.provider import JSONProvider
 
 """
 Utility Libraries
@@ -12,7 +12,7 @@ import configparser
 import json
 from datetime import datetime
 import time
-from bson import json_util
+from bson.json_util import ObjectId
 from pymongo import MongoClient
 from utilities import *
 
@@ -33,11 +33,29 @@ client = MongoClient(
     )
 )
 db = client[dbConfig["db"]]
+print("CONNECTED DB: ", client.list_database_names())
+
+
+class BSONEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, ObjectId):
+            return str(obj)
+        return super(BSONEncoder, self).default(obj)
+
+
+class BSONProvider(JSONProvider):
+    def dumps(self, obj, **kwargs):
+        return json.dumps(obj, **kwargs, cls=BSONEncoder)
+
+    def loads(self, s, **kwargs):
+        return json.loads(s, **kwargs)
 
 
 def init_app():
     app = Flask(__name__)
     CORS(app)
+    # app.json_provider_class = BSONProvider
+    app.json = BSONProvider(app)
 
     @app.route("/serverrunningstatus", methods=["GET"])
     def checkWorkingStatus():
@@ -51,6 +69,6 @@ def init_app():
     with app.app_context():
         from .customer import customer
 
-        app.register_blueprint(customer.customerBlueprint, url_prefix="/users")
+        app.register_blueprint(customer.customerBlueprint, url_prefix="/customer")
 
     return app
