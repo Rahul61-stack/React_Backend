@@ -17,6 +17,13 @@ def add_customer():
 def read_records():
     records = list(db.Customers.find())
     print(records)
-    # return jsonify(json_util.dumps(records))
+
+@customerBlueprint.route("/checkemail",methods=["POST"])
+def check_email():
+    print(request.json)
+    data = request.json
+    customer = list(db.Customers.find(data))
+    print(customer)
+    return customer
 
     return records
