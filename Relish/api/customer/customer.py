@@ -64,8 +64,10 @@ expected schema:
 def get():
     data = request.json
     customer = db.Customers.find_one(data)
-
-    return customer
+    if customer:
+        return "Exists"
+    else:
+        return "0"
 
 
 """
