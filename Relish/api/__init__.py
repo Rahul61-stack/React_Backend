@@ -68,7 +68,7 @@ def init_app():
 
     with app.app_context():
         from .customer import customer
-
+        from .items import items
         app.register_blueprint(customer.customerBlueprint, url_prefix="/customer")
-
+        app.register_blueprint(items.itemBlueprint,url_prefix = "/item")
     return app
